@@ -1,5 +1,5 @@
 # hadoop-HA-cluster-build
-
+目前HBASE和spark还没有搭建
 ## 集群介绍
 
 ### Cluster Name

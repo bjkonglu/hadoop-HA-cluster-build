@@ -18,6 +18,9 @@ chown root:yarn /etc/yarn-executor/container-executor
 chown root:yarn /etc/yarn-executor/container-executor.cfg
 chmod 6050 /etc/yarn-executor/container-executor
 chmod 750 /etc/yarn-executor/container-executor.cfg
+
+chmod 777  /data0 /data1
+chown hadp:hadoop /data0 /data1
 mkdir -p /data0/hadoop_tmp/nm-tc-rules
 chown hadp:hadoop /data0/hadoop_tmp/
 chmod 777 /data0/hadoop_tmp/

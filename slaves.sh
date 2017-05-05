@@ -1,4 +1,5 @@
-
+curPWD=`pwd`
+cd $(dirname "$0")
 usage(){
   echo "Usage: slaves.sh [--hosts hostfile] [--user user] [--script script] user COMMAND "
 }
@@ -25,6 +26,10 @@ while [ $# -gt 0 ];do
             INDEX=$1
             shift
             ;;
+        --ssh)
+            shift
+            MODE="ssh"
+            ;;
         -h)
             usage
             exit 0
@@ -39,7 +44,7 @@ while [ $# -gt 0 ];do
     esac
 done
 if [ $# = 0 ]; then
-  if [ "$SCRIPT_NAME" == "" ]; then
+  if [ "$SCRIPT_NAME" == "" ] && [ "$MODE" == "" ]; then
     usage
     exit 1
   fi
@@ -61,6 +66,9 @@ for slave in $SLAVE_NAMES ; do
   if [ "$SCRIPT_NAME" != "" ]; then
     echo -e "\033[42;37m ssh $SSH_HOST -C \"/bin/bash\" < $SCRIPT_NAME \033[0m"
     ssh $SSH_HOST -C "/bin/bash" < $SCRIPT_NAME
+  elif [ "$MODE" != "" ]; then
+    ssh $SSH_HOST -t "cd $curPWD; /bin/bash"
+    break
   else
     echo -e "\033[42;37m ssh $SSH_HOST $@ \033[0m"
     ssh $SSH_HOST "$@"
