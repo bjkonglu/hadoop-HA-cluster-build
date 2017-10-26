@@ -1,6 +1,6 @@
 cd $(dirname "$0")
 # zookeeper
-./slaves.sh --hosts zknode 'su - hadp -c "/software/servers/zookeeper-3.4.5/bin/zkServer.sh start"'
+slaves.sh --hosts zknode 'su - hadp -c "/software/servers/zookeeper-3.4.5/bin/zkServer.sh start"'
 
 su - hadp -c "hadoop-daemons.sh --hosts jn_slaves start journalnode"
 #su - hadp -c "cd `pwd`;./slaves.sh --hosts namenode  --index 1 hadoop-daemon.sh start namenode"
@@ -16,4 +16,4 @@ su - hadp -c "hdfs haadmin -getServiceState nn2"
 # 用mapred用户启动mr jobhistory
 
 su - yarn -c "$(cd `dirname $0`; pwd)/setup_yarn.sh"
-./slaves.sh --hosts jobhistory 'su - mapred -c "mr-jobhistory-daemon.sh start historyserver"'
+slaves.sh --hosts jobhistory 'su - mapred -c "mr-jobhistory-daemon.sh start historyserver"'

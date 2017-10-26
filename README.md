@@ -1,173 +1,86 @@
-# hadoop-HA-cluster-build
-目前HBASE和spark还没有搭建
-## 集群介绍
+# 搭建HADOOP-HA集群
 
-### Cluster Name
+## 集群角色分配
+|角色|描述|角色IP|兼职|兼职描述|
+|:---|:----|:---|:--|:------|
+|NN1  |NameNode节点   |ip-nn1|rm         |ResourceManager |
+|NN2  |NameNode节点   |ip-nn2|his-server |JobHistoryServer|
+|JN1  |JournalNode节点|ip-jn1|DN/NM      |DataNode/NodeManager|
+|JN2  |JournalNode节点|ip-jn2|DN/NM      |DataNode/NodeManager|
+|JN3  |JournalNode节点|ip-jn3|DN/NM      |DataNode/NodeManager|
+|ZK1  |ZooKeeper     |ip-zk1|DN/NM      |DataNode/NodeManager|
+|ZK2  |Zookeeper     |ip-zk2|DN/NM      |DataNode/NodeManager|
+|ZK3  |Zookeeper     |ip-zk3|DN/NM      |DataNode/NodeManager|
+|DN   |DataNode      |ip-其他|NM         |NodeManager    |
 
-pinball
+## 基础组件部署
 
-### 描述
+* SSH:免密登入
+    * NN1->其他节点
+    * NN2->其他节点
+* jdk 1.8.x
+* scala 2.1.x
+* hadoop 2.7.1
+* spark 2.1.1 -> 针对spark
+* zookeeper -> 针对zk集群节点（ip-zk1,ip-zk2,ip-zk3）
 
-搭建5个结点的测试集群，为了测试jdk1.8下hadoop的一些新特性
+## 基础目录创建
 
-## 环境配置
+### 节点公共目录
+* /data0/hadoop_tmp
+* /data0/hadoop_logs
+* /data0/hadoop_pids
+* /data0/yarn-logs
+* /data0/spark-logs -> 针对spark
 
-### 服务器
+### 角色特有目录
+|角色|私有目录|
+|:---|:------|
+|NN  |/data0/nn|
+|DN  |/data0/dfs|
+|NM  |/data0/yarn/local, /data0/yarn/logs|
+|JN  |/data0/journal/data|
+|ZK  |/data0/zookeeper/data, /data0/zookeeper/log|
 
-A|192.168.1.156
-B|192.168.1.157
-C|192.168.1.158
-D|192.168.1.159
-E|192.168.1.160
+## 配置文件修改
+* core-site.xml
+* hdfs-site.xml
+* yarn-site.xml
+* mapred-site.xml
 
+## 第一次启动集群步骤
+- zk集群启动
+> zkServer start
 
+- 格式化zookeeper上hadoop-ha目录
+> hdfs zkfc -formatZK
 
-### 软件环境
+- 启动journalnode(namenode日志同步服务)
+> hadoop-daemon.sh start journalnode
 
-| 名称           |版本|            备注|
-|---------------|------------------------|--------------------------------|
-| 操作系统 |centos|7.1.1503|
-| JDK     |1.8u65以上||
-| HADOOP|2.7.1||
-| ZK      |3.4.5||
-| SPARK   |2.5.1||
+- 格式化namenode
+> hdfs dfs -format
 
+- 启动namenode, 同步备用namenode, 启动备用namenode
+>hadoop-daemon.sh start namenode, hdfs haadmin -bootstrapStandby, hadoop-daemon.sh start namenode
 
-### 角色分配
-代号|hostname|角色
----|--------|-----
-A  |192.168.1.156| NN1/RM1
-B  |192.168.1.157| NN2/RM2/sparkhistory/MRJH/Metastore
-C  |192.168.1.158| DN/NM/ZK/JN/HBASE
-D  |192.168.1.159| DN/NM/ZK/JN/HBASE
-E  |192.168.1.160| DN/NM/ZK/JN/HBASE
+- 启动zkfc(DFSZKFailoverController)
+>hadoop-daemon.sh start zkfc
 
-### 角色信息
-角色| 用户|相关位置|备注
-----|-----|----|----
-zk | hadp|/data0/logs/zookeeper-logs,/data0/zookeeper-3.4.5|
-NN | hadp|/data0/hadoop-logs|同时启动DFSZKFailoverController进程
-DN | hadp|/data0/hadoop-logs|
-NM | yarn|/data1/yarn-logs|
-JN | hadp|/data0/hadoop-logs|
-RM | yarn|/data1/yarn-logs|
-MRJH | mapred |/data0/hadoop-logs/|
-ApplicationHistoryServer | yarn |/data1/yarn-logs|
-sparkHistory|mapred| |
+- 启动datanode
+>hadoop-deamons.sh start datanode
 
-### 挂载硬盘
-- 创建ext4分区并挂载到/data0和/data1
-```bash
-# 查看已有分区和挂载点
-df -Th 
-# 查看硬盘设备
-ls /dev/sd*
-# (*)查看未分区使用的硬盘
-blkid
-# (*)格式化分区
-mkfs.ext4 -L data0 /dev/sdb
-mkfs.ext4 -L data1 /dev/sdc
-# (*)查看分区和uuid
-blkid
-# (*)编辑fstab文件
-vim /etc/fstab
-# (*)加入两行
-UUID=bc5261d1-27be-4569-90fe-1f67124d3bf6 /data0 ext4 defaults 1 2 
-UUID=8f274d7d-09db-4df5-b286-c7a2742aa128 /data1 ext4 defaults 1 2
-# (*)创建/data0 /data1文件夹
-mkdir /data0 /data1
-# (*)挂载 fstab中的分区
-mount -a
-# (*)查看已有分区和挂载点
-df -Th 
-```
-### 修改/etc/hosts
-```
-192.168.1.156  HADOOP-1-156
-192.168.1.157  HADOOP-1-157
-192.168.1.158  HADOOP-1-158
-192.168.1.159  HADOOP-1-159
-192.168.1.160  HADOOP-1-160
-```
-### 脚本介绍
+- 启动yarn
+>start-yarn.sh
 
-- 为了方便,先将root用户A到BCDE免密，然后使用工具脚本执行命令
-  - slaves.sh 多结点执行命令
-  - allcli.sh 交互多结点执行命令
-  - createuser.sh
+- 启动JobHistoryServer
+>mr-jobhistory-deamon.sh start historyserver
 
-### 用户和免密
-- root用户A到BCDE免密
-- 创建hadp,yarn,mapred用户
-```bash
-$ slaves.sh --hosts allnode createuser.sh
-```
-- hadp@A 和 hadp@B 到C\D\E免密
+## 测试集群步骤
 
-```bash
-$ ssh hadp@HADOOP-1-156
-$ ssh-copy-id HADOOP-1-156
-$ ssh-copy-id HADOOP-1-158
-$ ssh-copy-id HADOOP-1-159
-$ ssh-copy-id HADOOP-1-160
-$ ssh hadp@HADOOP-1-157
-$ ssh-copy-id HADOOP-1-157
-$ ssh-copy-id HADOOP-1-158
-$ ssh-copy-id HADOOP-1-159
-$ ssh-copy-id HADOOP-1-160
-```
-
-- yarn@A 和 yarn@B 到C\D\E免密
-```bash
-$ ssh yarn@HADOOP-1-156
-$ ssh-copy-id HADOOP-1-156
-$ ssh-copy-id HADOOP-1-158
-$ ssh-copy-id HADOOP-1-159
-$ ssh-copy-id HADOOP-1-160
-$ ssh yarn@HADOOP-1-157
-$ ssh-copy-id HADOOP-1-157
-$ ssh-copy-id HADOOP-1-158
-$ ssh-copy-id HADOOP-1-159
-$ ssh-copy-id HADOOP-1-160
-```
-### 配置JDK1.8.65
-
-### 搭建zookeeper
-
-在C D E上搭建zookeeper
-
-- 分别配置conf/zoo.cfg
-- 分别生成文件/data0/zookeeper-3.4.5/data/myid，内容在C D E 上分别为1、2、3
-- 启动(在setup_all.sh脚本中启动)单独启动脚本如下
-```bash
-$ ./slaves.sh --hosts zknode 'su - hadp -c "/software/servers/zookeeper-3.4.5/bin/zkServer.sh start"'
-```
-
-### 搭建HDFS
-
-在A上以hdfs用户执行`hdfs zkfc -formatZK`，会在zk中创建结点`/pinball-hadoop-ha/ns1`
-
-
-- 启动jn
-编辑/etc/hadoop/slaves 换行分割
-`sbin/hadoop-daemons.sh --hosts jn_slaves start journalnode`
-
-
-### 复制需要的jar到对应的目录
-./hadoop/common/lib/hadoop-lzo-0.4.20.jar
-./hadoop/yarn/spark-1.4.0-SNAPSHOT-yarn-shuffle.jar
-
-
-### 启动所有（zk、hdfs、yarn、目录权限）
-```bash
-$ ./setup_all.sh
-```
-
-### 卸载所有 (zk、hdfs、yarn、log、data)
-```bash
-$ ./uninstall_all.sh
-```
-### 检查是否成功
-```bash
-./check.sh
-```
+1. 测试hdfs
+    - 本地文件上传到hdfs
+    - 读取hdfs文件
+2. ha特性
+    - nn1:active, nn2:standby -> 遇到nn1->down -> nn2:active 
+3. 在yarn上提交任务
