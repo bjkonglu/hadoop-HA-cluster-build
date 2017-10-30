@@ -73,8 +73,9 @@
 - 启动yarn
 >start-yarn.sh
 
-- 启动JobHistoryServer
+- 启动yarn日志服务JobHistoryServer和spark的历史日志服务
 >mr-jobhistory-deamon.sh start historyserver
+start-history-server.sh
 
 ## 测试集群步骤
 
