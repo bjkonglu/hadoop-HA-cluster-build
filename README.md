@@ -28,8 +28,8 @@
 
 ### 节点公共目录
 * /data0/hadoop_tmp
-* /data0/hadoop_logs
-* /data0/hadoop_pids
+* /data0/hadoop-logs
+* /data0/hadoop-pids
 * /data0/yarn-logs
 * /data0/spark-logs -> 针对spark
 
