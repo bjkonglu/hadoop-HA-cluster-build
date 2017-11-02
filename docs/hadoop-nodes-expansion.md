@@ -30,7 +30,9 @@
   
 - 启动基础进程
   - 启动datanode进程
+  > hadoop-daemon.sh start datanode
   - 启动nodemanager进程
+  > yarn-daemon.sh start nodemanager
 
 - 刷新整个集群资源
   - HDFS
