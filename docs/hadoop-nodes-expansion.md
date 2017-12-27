@@ -43,6 +43,12 @@
     - 刷新队列资源：yarn rmadmin -refreshQueues
 
 ## 服务器基本属性
+  - 总核数 = 物理CPU个数 x 每个物理CPU的核数
+  - 总逻辑CPU核数 = 物理CPU个数 x 每个物理CPU的核数 x 超线程数
+  - 查看物理CPU个数：cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l
+  - 查看每个物理CPU中的核数：cat /proc/cpuinfo| grep "cpu cores"| uniq
+  - 查看逻辑CPU的个数：cat /proc/cpuinfo| grep "processor"| wc -l 
+
   - processor:32
-  - cpu cores:8
+  - 总核数: 2x8
   - MemTotal:128g
