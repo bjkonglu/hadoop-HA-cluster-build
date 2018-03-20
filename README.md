@@ -59,7 +59,7 @@
 > hadoop-daemon.sh start journalnode
 
 - 格式化namenode
-> hdfs dfs -format
+> hdfs namenode -format
 
 - 启动namenode, 同步备用namenode, 启动备用namenode
 >hadoop-daemon.sh start namenode, hdfs haadmin -bootstrapStandby, hadoop-daemon.sh start namenode
