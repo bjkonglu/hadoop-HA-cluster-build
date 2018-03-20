@@ -62,7 +62,7 @@
 > hdfs namenode -format
 
 - 启动namenode, 同步备用namenode, 启动备用namenode
->hadoop-daemon.sh start namenode, hdfs haadmin -bootstrapStandby, hadoop-daemon.sh start namenode
+>hadoop-daemon.sh start namenode, hdfs namenode -bootstrapStandby, hadoop-daemon.sh start namenode
 
 - 启动zkfc(DFSZKFailoverController)
 >hadoop-daemon.sh start zkfc
