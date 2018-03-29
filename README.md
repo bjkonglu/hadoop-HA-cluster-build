@@ -74,7 +74,7 @@
 >start-yarn.sh
 
 - 启动yarn日志服务JobHistoryServer和spark的历史日志服务
->mr-jobhistory-deamon.sh start historyserver
+>mr-jobhistory-daemon.sh start historyserver
 
 >start-history-server.sh
 
