@@ -68,7 +68,7 @@
 >hadoop-daemon.sh start zkfc
 
 - 启动datanode
->hadoop-deamons.sh start datanode
+>hadoop-daemons.sh start datanode
 
 - 启动yarn
 >start-yarn.sh
